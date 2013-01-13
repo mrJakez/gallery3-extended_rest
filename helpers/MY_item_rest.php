@@ -27,8 +27,6 @@ class item_rest extends item_rest_Core {
 		
 		$exif = ORM::factory('exif_coordinate')->where('item_id', '=', $item_id)->find();
     	
-    	$result['entity']['hurensohn'] = 'Helmut';
-
 		if ($exif->id) {
 			$result['entity']['coordinate_latitude'] = $exif->latitude;
 			$result['entity']['coordinate_longitude'] = $exif->longitude;
