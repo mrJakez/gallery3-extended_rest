@@ -21,9 +21,15 @@ class gps_rest_installer {
 
   static function can_activate() {
     $messages = array();
-    if (!module::is_active("exif_gps")) {
-      $messages["warn"][] = t("The GPS_REST module requires the exif_gps module.");
+    
+    if (!module::is_active("rest")) {
+      $messages["warn"][] = t("The Extended REST module requires the REST module.");
     }
+    
+    if (!module::is_active("exif_gps")) {
+      $messages["warn"][] = t("The Extended REST module requires the exif_gps module.");
+    }
+    
     return $messages;
   }
   

@@ -26,11 +26,31 @@ class item_rest extends item_rest_Core {
 		$item_id = $result['entity']['id'];
 		
 		$exif = ORM::factory('exif_coordinate')->where('item_id', '=', $item_id)->find();
-    	
-		if ($exif->id) {
+    
+        if ($exif->id) {
 			$result['entity']['coordinate_latitude'] = $exif->latitude;
 			$result['entity']['coordinate_longitude'] = $exif->longitude;
 		}
+        
+        $item = ORM::factory('item', $item_id);
+        
+        $cover_limit = 5;
+        $current_cover = 1;
+        
+        foreach($item->children() as $child) {
+      
+        	if ($current_cover != 1) {
+	        	$result['entity']['album_cover_'.$current_cover] = rest::url("item", $child);
+	        
+	        	if ($current_cover >= $cover_limit) {
+		    	    break;
+		    	    }
+	        }
+	        
+	        if($child->is_photo()){
+		        $current_cover++;
+	        }
+        }
 
 		return $result;
 	}

@@ -69,6 +69,25 @@ class items_rest extends items_rest_Core {
 		$item_rest['entity']['coordinate_latitude'] = $exif->latitude;
 		$item_rest['entity']['coordinate_longitude'] = $exif->longitude;
 	}
+	    
+    $cover_limit = 5;
+    $current_cover = 1;
+    
+    foreach($item->children() as $child) {
+  
+    	if ($current_cover != 1) {
+        	$result['entity']['album_cover_'.$current_cover] = rest::url("item", $child);
+        
+        	if ($current_cover >= $cover_limit) {
+	    	    break;
+	    	    }
+        }
+        
+        if($child->is_photo()){
+	        $current_cover++;
+        }
+    }
+
                        
                        
     if ($item->type == "album") {

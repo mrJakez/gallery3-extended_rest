@@ -1,7 +1,7 @@
-name = GPS REST
-description = Provide GPS infos via REST
+name = Extended REST
+description = Provide GPS infos and multiple album covers via REST
 version = 1
 author_name = "Dennis Rochel"
 author_url = "https://github.com/mrJakez"
-info_url = "https://github.com/mrJakez/gallery3-gps_rest/"
-discuss_url = "https://github.com/mrJakez/gallery3-gps_rest/issues"
+info_url = "https://github.com/mrJakez/gallery3-extended_rest/"
+discuss_url = "https://github.com/mrJakez/gallery3-extended_rest/issues"
