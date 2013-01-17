@@ -48,17 +48,19 @@ class item_rest extends item_rest_Core {
 				if ($child->id == $item->album_cover_item_id) {
 					continue;
 				}
+				
+				if ($child->is_album()) {
+					continue;
+				}
 			 
 				$result['entity']['extended_album_cover_' . $current_cover] = rest::url("data", $child, "resize");
 			
 				if ($current_cover >= $cover_limit) {
 					break;
 				}
-		
-				if($child->is_photo()) {
-					$current_cover++;
-				}
-		 	}	
+				
+				$current_cover++;
+			}	
 		}
 
 		return $result;
