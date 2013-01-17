@@ -10,47 +10,56 @@
  *
  * This program is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the GNU
  * General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA  02110-1301, USA.
  */
- 
+
 class item_rest extends item_rest_Core {
 
 	static function get($request) {
+	
 		$result = parent::get($request);
 
 		$item_id = $result['entity']['id'];
 		
 		$exif = ORM::factory('exif_coordinate')->where('item_id', '=', $item_id)->find();
-    
-        if ($exif->id) {
+	
+		if ($exif->id) {
 			$result['entity']['coordinate_latitude'] = $exif->latitude;
 			$result['entity']['coordinate_longitude'] = $exif->longitude;
+		}		
+		
+		$item = ORM::factory('item', $item_id);
+		
+		if ($item->is_album()) {
+		
+			$cover_limit = 5;
+			$current_cover = 2;
+		
+			$coverItem = ORM::factory('item', $item->album_cover_item_id);
+			$result['entity']['extended_album_cover_1'] = rest::url("data", $coverItem, "resize"); 
+
+			foreach($item->children() as $child) {
+	  
+				if ($child->id == $item->album_cover_item_id) {
+					continue;
+				}
+			 
+				$result['entity']['extended_album_cover_' . $current_cover] = rest::url("data", $child, "resize");
+			
+				if ($current_cover >= $cover_limit) {
+					break;
+				}
+		
+				if($child->is_photo()) {
+					$current_cover++;
+				}
+		 	}	
 		}
-        
-        $item = ORM::factory('item', $item_id);
-        
-        $cover_limit = 5;
-        $current_cover = 1;
-        
-        foreach($item->children() as $child) {
-      
-        	if ($current_cover != 1) {
-	        	$result['entity']['album_cover_'.$current_cover] = rest::url("item", $child);
-	        
-	        	if ($current_cover >= $cover_limit) {
-		    	    break;
-		    	    }
-	        }
-	        
-	        if($child->is_photo()){
-		        $current_cover++;
-	        }
-        }
 
 		return $result;
 	}
