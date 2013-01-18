@@ -20,7 +20,7 @@
  
 class items_rest extends items_rest_Core {
 
-	//TODO: warum muss get() hier kopiert werden? Ist doch ne extended Klasse?
+	//TODO: why implement the get() function? Isn't it an extended class?
   static function get($request) {
     $items = array();
     $types = array();
@@ -70,22 +70,32 @@ class items_rest extends items_rest_Core {
 		$item_rest['entity']['coordinate_longitude'] = $exif->longitude;
 	}
 	    
-    $cover_limit = 5;
-    $current_cover = 1;
+	if ($item->is_album()) {
     
-    foreach($item->children() as $child) {
+    	$cover_limit = 5;
+    	$current_cover = 2;
+    
+    	$coverItem = ORM::factory('item', $item->album_cover_item_id);
+    	$item_rest['entity']['extended_album_cover_1'] = rest::url("data", $coverItem, "resize"); 
+
+    	foreach($item->children() as $child) {
   
-    	if ($current_cover != 1) {
-        	$result['entity']['album_cover_'.$current_cover] = rest::url("item", $child);
-        
-        	if ($current_cover >= $cover_limit) {
-	    	    break;
-	    	    }
-        }
-        
-        if($child->is_photo()){
-	        $current_cover++;
-        }
+    		if ($child->id == $item->album_cover_item_id) {
+    			continue;
+    		}
+    		
+    		if ($child->is_album()) {
+    			continue;
+    		}
+    	 
+    		$item_rest['entity']['extended_album_cover_' . $current_cover] = rest::url("data", $child, "resize");
+    	
+    		if ($current_cover >= $cover_limit) {
+    			break;
+    		}
+    		
+    		$current_cover++;
+    	}	
     }
 
                        
