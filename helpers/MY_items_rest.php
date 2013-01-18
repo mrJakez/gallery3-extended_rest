@@ -76,15 +76,20 @@ class items_rest extends items_rest_Core {
     	$current_cover = 2;
     
     	$coverItem = ORM::factory('item', $item->album_cover_item_id);
-    	$item_rest['entity']['extended_album_cover_1'] = rest::url("data", $coverItem, "resize"); 
-
+    	
+    	if ($coverItem->is_photo()) {
+	    	$item_rest['entity']['extended_album_cover_1'] = rest::url("data", $coverItem, "resize"); 
+    	}else{
+	    	$current_cover = 1;
+    	}
+    	
     	foreach($item->children() as $child) {
   
     		if ($child->id == $item->album_cover_item_id) {
     			continue;
     		}
     		
-    		if ($child->is_album()) {
+    		if (!$child->is_photo()) {
     			continue;
     		}
     	 
