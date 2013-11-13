@@ -63,13 +63,37 @@ class items_rest extends items_rest_Core {
                        
 	$item_id = $item_rest['entity']['id'];
 		
-	$exif = ORM::factory('exif_coordinate')->where('item_id', '=', $item_id)->find();
-    	
-	if ($exif->id) {
-		$item_rest['entity']['coordinate_latitude'] = $exif->latitude;
-		$item_rest['entity']['coordinate_longitude'] = $exif->longitude;
-	}
-	    
+
+	if (module::is_active("exif_gps")) {
+	
+		$exif = ORM::factory('exif_coordinate')->where('item_id', '=', $item_id)->find();
+
+		if ($exif->id) {
+			$result['entity']['coordinate_latitude'] = $exif->latitude;
+			$result['entity']['coordinate_longitude'] = $exif->longitude;
+		}
+	} 
+  
+		
+		$transcodes = ORM::factory('transcode_resolution')->where('item_id', '=', $item_id)->find_all();
+
+		$item_rest['entity']['transcoded_videos'] = array();
+		
+		foreach($transcodes as $key => $transcode) {
+			
+			$entry = array();
+			$entry['description'] = $transcode->resolution;
+			$entry['url'] = url::abs_file("var/modules/transcode/flv/" . $item->id) .'/'. $transcode->resolution .'.'. module::get_var("transcode", "format");
+			$result['entity']['transcoded_videos'][] = $entry;
+			
+			if($key == 0) {
+				$item_rest['entity']['file_url_public'] = $entry['url'];
+				$item_rest['entity']['file_url'] = $entry['url'];
+			}
+		}
+	
+	  
+	  
 	if ($item->is_album()) {
     
     	$cover_limit = 5;
