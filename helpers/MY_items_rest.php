@@ -54,80 +54,15 @@ class items_rest extends items_rest_Core {
     return $items;
   }
   
+  
   private static function _format_restful_item($item, $types) {
     $item_rest = array("url" => rest::url("item", $item),
                        "entity" => $item->as_restful_array(),
                        "relationships" => rest::relationships("item", $item));
-            
-            
-                       
-	$item_id = $item_rest['entity']['id'];
-		
-
-	if (module::is_active("exif_gps")) {
-	
-		$exif = ORM::factory('exif_coordinate')->where('item_id', '=', $item_id)->find();
-
-		if ($exif->id) {
-			$result['entity']['coordinate_latitude'] = $exif->latitude;
-			$result['entity']['coordinate_longitude'] = $exif->longitude;
-		}
-	} 
-  
-		
-		$transcodes = ORM::factory('transcode_resolution')->where('item_id', '=', $item_id)->find_all();
-
-		$item_rest['entity']['transcoded_videos'] = array();
-		
-		foreach($transcodes as $key => $transcode) {
-			
-			$entry = array();
-			$entry['description'] = $transcode->resolution;
-			$entry['url'] = url::abs_file("var/modules/transcode/flv/" . $item->id) .'/'. $transcode->resolution .'.'. module::get_var("transcode", "format");
-			$result['entity']['transcoded_videos'][] = $entry;
-			
-			if($key == 0) {
-				$item_rest['entity']['file_url_public'] = $entry['url'];
-				$item_rest['entity']['file_url'] = $entry['url'];
-			}
-		}
-	
-	  
-	  
-	if ($item->is_album()) {
-    
-    	$cover_limit = 5;
-    	$current_cover = 2;
-    
-    	$coverItem = ORM::factory('item', $item->album_cover_item_id);
-    	
-    	if ($coverItem->is_photo()) {
-	    	$item_rest['entity']['extended_album_cover_1'] = rest::url("data", $coverItem, "resize"); 
-    	}else{
-	    	$current_cover = 1;
-    	}
-    	
-    	foreach($item->children() as $child) {
-  
-    		if ($child->id == $item->album_cover_item_id) {
-    			continue;
-    		}
-    		
-    		if (!$child->is_photo()) {
-    			continue;
-    		}
-    	 
-    		$item_rest['entity']['extended_album_cover_' . $current_cover] = rest::url("data", $child, "resize");
-    	
-    		if ($current_cover >= $cover_limit) {
-    			break;
-    		}
-    		
-    		$current_cover++;
-    	}	
-    }
-
-                       
+            		
+	extended_rest::injectGps($item, $item_rest);
+	extended_rest::injectTranscodedVideos($item, $item_rest);
+	extended_rest::injectMultipleAlbumCovers($item, $item_rest);
                        
     if ($item->type == "album") {
       $members = array();
